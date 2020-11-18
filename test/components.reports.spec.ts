@@ -1,5 +1,7 @@
 import request from 'supertest';
 import Server from '../src/server';
+import PromiseExtended from './../src/util/promise';
+import SupertestExtended from './../src/util/supertest';
 // import { expect } from 'chai';
 // import mocha from 'mocha';
 
@@ -20,18 +22,20 @@ describe('POST /sessions/reports', function () {
       .post('/sessions/reports')
       .send({ file: 'hello' })
       .expect('Content-Type', /json/)
-      .expect(200, done);
+      .expect(SupertestExtended.statusOf([201, 202]))
+      .end(done);
   });
 });
+
 describe('GET /sessions/reports/:id', function () {
   it('responds with json for valid id', function () {
     let id = '';
-    return Promise.resolve().then(getIdFromPostRequest).then(getSummaryFromId);
+    return Promise.resolve().then(getIdFromPostRequest).then(PromiseExtended.delay(1000)).then(getSummaryFromId);
     function getIdFromPostRequest() {
       return request(app)
         .post('/sessions/reports')
         .send({ file: 'hello' })
-        .expect(200)
+        .expect(SupertestExtended.statusOf([201, 202]))
         .expect(function (res) {
           id = res.body.id;
         });
@@ -39,6 +43,7 @@ describe('GET /sessions/reports/:id', function () {
     function getSummaryFromId() {
       return request(app)
         .get(`/sessions/reports/${id}`)
+        // TODO: clean this up :\
         .expect(() => {
           const checks = [() => typeof id === 'string', () => id.length > 0];
           // Values used for banned types are above in checks
@@ -69,16 +74,9 @@ describe('GET /sessions/reports/:id', function () {
 
 describe('GET /sessions/reports/:id', function () {
   it('responds with 404 for invalid id', function () {
-    return (
-      Promise.resolve()
-        .then(getSummaryFromId)
-    );
+    return Promise.resolve().then(getSummaryFromId);
     function getSummaryFromId() {
-      return (
-        request(app)
-          .get('/sessions/reports/some_invalid_id')
-          .expect(404)
-      );
+      return request(app).get('/sessions/reports/some_invalid_id').expect(404);
     }
   });
 });

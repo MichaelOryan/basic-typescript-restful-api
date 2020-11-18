@@ -2,27 +2,58 @@ import Summary from './summary.interface';
 import SummaryTable from './summaryTable.interface';
 import { v4 as uuidv4 } from 'uuid';
 import Csv from './../../../util/csv';
-
+import Result from './../../../interfaces/post.result.interface';
+import HttpStatusCode from './../../../util/htmlcodes';
 class SummaryModel {
   private table: SummaryTable = {};
 
-  //   constructor() {}
+  public async addCsv(text: string): Promise<Result> {
+    const id = this.newId();
 
-  public addCsv(text: string): Promise<string> {
-    return Promise.resolve('promise resolve')
+    Promise.resolve()
       .then(SummaryModel.convertToCsv(text))
       .then(SummaryModel.calculateSummary)
-      .then((summary) => this.addSummary(summary));
+      .then(this.addSummary(id));
+
+    return this.summaryAccessResponse(id);
   }
 
-  private addSummary(summary: Summary): string {
-    const id = this.newId();
-    this.table[id] = summary;
-    return id;
+  private addSummary(id: string): (summary: Summary) => string{
+    return (summary: Summary): string => {
+      this.table[id] = summary;
+      return id;
+    };
   }
 
   private newId(): string {
     return uuidv4();
+  }
+
+  private summaryAccessResponse(id: string): Result {
+    return {
+      status: this.summaryStatus(id),
+      location: this.summaryRelativePath(id),
+      data: this.summaryPostResponse(id),
+    };
+  }
+
+  private summaryStatus(id: string): HttpStatusCode {
+    if (this.summaryLoaded(id)) return HttpStatusCode.CREATED;
+    else return HttpStatusCode.ACCEPTED;
+  }
+
+  private summaryLoaded(id: string): boolean {
+    return id in this.table;
+  }
+
+  private summaryRelativePath(id: string): string {
+    return `/${id}`;
+  }
+
+  private summaryPostResponse(id: string): any {
+    return {
+      id: id,
+    };
   }
 
   private static convertToCsv(text: string) {
