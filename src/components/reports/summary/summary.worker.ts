@@ -9,7 +9,7 @@ require(path.resolve(__dirname, workerData.path));
 
 
 function calculateSummary(text: string): Summary {
-  const csv:Csv = SummaryModel.convertToCsv(text)();
+  const csv:Csv = SummaryModel.convertToCsv(text);
   const summary:Summary = SummaryModel.calculateSummary(csv);
   return summary;
 }

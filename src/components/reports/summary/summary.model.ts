@@ -66,8 +66,8 @@ class SummaryModel {
     };
   }
 
-  public static convertToCsv(text: string) {
-    return (): Csv => new Csv(text);
+  public static convertToCsv(text: string):Csv {
+    return new Csv(text);
   }
 
   public static calculateSummary(csv: Csv): Summary {
