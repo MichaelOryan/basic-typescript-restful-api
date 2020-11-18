@@ -23,10 +23,11 @@ class App {
     });
   }
 
-  public listen() {
+  public listen(): App {
     this._app.listen(this._port, () => {
       console.log(`App listening on the port ${this._port}`);
     });
+    return this;
   }
 
   public port(): number {

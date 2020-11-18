@@ -1,8 +1,6 @@
-import { Request, Response, NextFunction, Router } from 'express';
+import { Request, Response, Router } from 'express';
 import Controller from '../../interfaces/controller.interface';
 import SummeryModel from './summary/summary.model';
-import Summary from './summary/summary.interface';
-import CSV from './../../util/csv';
 
 class ReportController implements Controller {
   public path = '/sessions/reports';

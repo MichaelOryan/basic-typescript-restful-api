@@ -1,8 +1,7 @@
 import request from 'supertest';
 import Server from '../src/server';
-import { expect } from 'chai';
-import mocha from 'mocha';
-import Summary from './../src/components/reports/summary/summary.interface';
+// import { expect } from 'chai';
+// import mocha from 'mocha';
 
 const app = new Server().expressApp();
 
@@ -21,7 +20,6 @@ describe('POST /sessions/reports', function () {
       .post('/sessions/reports')
       .send({ file: 'hello' })
       .expect('Content-Type', /json/)
-      // .expect('Content-Length',JSON.stringify({id: 'some id'}).length.toString())
       .expect(200, done);
   });
 });
@@ -71,25 +69,14 @@ describe('GET /sessions/reports/:id', function () {
 
 describe('GET /sessions/reports/:id', function () {
   it('responds with 404 for invalid id', function () {
-    let id = '';
     return (
       Promise.resolve()
-        // .then(getIdFromPostRequest)
         .then(getSummaryFromId)
     );
-    function getIdFromPostRequest() {
-      return request(app)
-        .post('/sessions/reports')
-        .expect(200)
-        .expect(function (res) {
-          id = res.body.id;
-        });
-    }
     function getSummaryFromId() {
       return (
         request(app)
-          .get(`/sessions/reports/${id}_invalid_id`)
-          //   .expect("Content-Type", /html/)
+          .get('/sessions/reports/some_invalid_id')
           .expect(404)
       );
     }

@@ -8,7 +8,7 @@ class SummaryModel {
 
   //   constructor() {}
 
-  public addCsv(text: string) {
+  public addCsv(text: string): Promise<string> {
     return Promise.resolve('promise resolve')
       .then(SummaryModel.convertToCsv(text))
       .then(SummaryModel.calculateSummary)
@@ -29,7 +29,7 @@ class SummaryModel {
     return (): Csv => new Csv(text);
   }
 
-  private static calculateSummary(csv: Csv) {
+  private static calculateSummary(csv: Csv): Summary {
     const summary: Summary = {
       averagePageViewsPerDay: 0,
       userSessionRatio: 0,
@@ -38,7 +38,7 @@ class SummaryModel {
     return summary;
   }
 
-  public async summary(id: string) {
+  public async summary(id: string): Promise<Summary> {
     if (id in this.table) {
       return this.table[id];
     } else {

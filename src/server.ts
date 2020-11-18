@@ -10,19 +10,18 @@ class Server {
 
   constructor() {
     this._app = new App(Controllers.all(), Server.envPort());
-    return this;
   }
 
-  public expressApp() {
+  public expressApp():Express.Application {
     return this._app.app();
   }
 
-  public start() {
+  public start():Server {
     this._app.listen();
     return this;
   }
 
-  public static envPort() {
+  public static envPort():number {
     return Number(process.env.PORT || 3000);
   }
 

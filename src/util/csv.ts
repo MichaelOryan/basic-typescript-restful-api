@@ -37,7 +37,7 @@ class Csv {
   }
 
   public static csvFromPost(request: Request) {
-    return (id: string) => Csv.csvFromRequest(request, id);
+    return (id: string):CsvRows => Csv.csvFromRequest(request, id);
   }
 
   private static csvFromRequest(request: Request, id: string): CsvRows {
