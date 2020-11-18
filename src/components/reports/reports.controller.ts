@@ -1,9 +1,14 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import Controller from '../../interfaces/controller.interface';
+import SummeryModel from './summary/summary.model';
+import Summary from './summary/summary.interface';
+import CSV from './../../util/csv';
 
 class ReportController implements Controller {
   public path = '/sessions/reports';
   public router = Router();
+
+  private summeryModel: SummeryModel = new SummeryModel();
 
   constructor() {
     this.initializeRoutes();
@@ -12,17 +17,26 @@ class ReportController implements Controller {
   private initializeRoutes() {
     this.router.post(this.path, this.uploadCSVFile);
     this.router.get(`${this.path}/:id`, this.getCSVSummaryById);
-
   }
 
   private uploadCSVFile = async (request: Request, response: Response) => {
-    response.status(200).json({ id: 'some id' });
-  }
+    this.summeryModel
+      .addCsv(request.body.file)
+      .then((id) => response.status(200).json({ id: id }))
+      .catch((err) => {
+        response.status(500).json(err);
+      });
+  };
 
   private getCSVSummaryById = async (request: Request, response: Response) => {
-    response.status(200).json({});
-  }
-
+    const id = request.params.id;
+    this.summeryModel
+      .summary(id)
+      .then((summary) => response.status(200).json(summary))
+      .catch((err) => {
+        response.status(404).send(err);
+      });
+  };
 }
 
 export default ReportController;
