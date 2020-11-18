@@ -8,7 +8,6 @@ class Controllers {
       new ReportController(),
     ];
   }
-
 }
 
 export default Controllers;

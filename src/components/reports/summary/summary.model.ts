@@ -4,21 +4,31 @@ import { v4 as uuidv4 } from 'uuid';
 import Csv from './../../../util/csv';
 import Result from './../../../interfaces/post.result.interface';
 import HttpStatusCode from './../../../util/htmlcodes';
+import { Worker } from 'worker_threads';
+
 class SummaryModel {
   private table: SummaryTable = {};
 
   public async addCsv(text: string): Promise<Result> {
     const id = this.newId();
-
-    Promise.resolve()
-      .then(SummaryModel.convertToCsv(text))
-      .then(SummaryModel.calculateSummary)
-      .then(this.addSummary(id));
-
+    this.sendCsvToCalculateSummaryQueue(text, id);
     return this.summaryAccessResponse(id);
   }
 
-  private addSummary(id: string): (summary: Summary) => string{
+  // Better to use worker pool but meh
+  private sendCsvToCalculateSummaryQueue(text: string, id: string):void {
+    const worker = new Worker('./dist/src/components/reports/summary/summary.worker.js', {
+      workerData: {
+        value: text,
+        path: './summary.worker.js'
+      }
+    });
+    worker.on('message', (result) => {
+      this.addSummary(id)(result);
+    });
+  }
+
+  private addSummary(id: string): (summary: Summary) => string {
     return (summary: Summary): string => {
       this.table[id] = summary;
       return id;
@@ -56,11 +66,11 @@ class SummaryModel {
     };
   }
 
-  private static convertToCsv(text: string) {
+  public static convertToCsv(text: string) {
     return (): Csv => new Csv(text);
   }
 
-  private static calculateSummary(csv: Csv): Summary {
+  public static calculateSummary(csv: Csv): Summary {
     const summary: Summary = {
       averagePageViewsPerDay: 0,
       userSessionRatio: 0,
