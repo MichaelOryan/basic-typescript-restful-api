@@ -5,7 +5,6 @@ import Csv from './../../../util/csv';
 import Result from './../../../interfaces/post.result.interface';
 import HttpStatusCode from './../../../util/htmlcodes';
 import { Worker } from 'worker_threads';
-// import StatusCodes from './summary-report-status-codes';
 import ReportStatusCode from './summary-report-status-codes';
 
 class SummaryModel {
@@ -39,7 +38,7 @@ class SummaryModel {
   }
 
   private addSummary(id: string, summary: Summary): string {
-    this.table[id] = summary;
+    this.table[id].summery = summary;
     this.table[id].status = ReportStatusCode.AVAILABLE;
     return id;
   }
@@ -89,10 +88,10 @@ class SummaryModel {
   }
 
   public async summary(id: string): Promise<Summary> {
-    if (id in this.table) {
-      return this.table[id];
+    if (id in this.table && this.table[id].status === ReportStatusCode.AVAILABLE) {
+      return this.table[id].summery;
     } else {
-      throw new Error(`${id} not found.`);
+      throw new Error(`${id} not available.`);
     }
   }
 
