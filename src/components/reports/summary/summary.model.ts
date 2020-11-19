@@ -5,14 +5,22 @@ import Csv from './../../../util/csv';
 import Result from './../../../interfaces/post.result.interface';
 import HttpStatusCode from './../../../util/htmlcodes';
 import { Worker } from 'worker_threads';
+// import StatusCodes from './summary-report-status-codes';
+import ReportStatusCode from './summary-report-status-codes';
 
 class SummaryModel {
   private table: SummaryTable = {};
 
   public async addCsv(text: string): Promise<Result> {
     const id = this.newId();
+    this.setSummaryStatus(id, ReportStatusCode.BUILDING);
     this.sendCsvToCalculateSummaryQueue(text, id);
     return this.summaryAccessResponse(id);
+  }
+
+  private setSummaryStatus(id: string, status:ReportStatusCode): void {
+    this.table[id] = this.table[id] || {};
+    this.table[id].status = status;
   }
 
   // Better to use worker pool but meh
@@ -24,15 +32,16 @@ class SummaryModel {
       }
     });
     worker.on('message', (result) => {
-      this.addSummary(id)(result);
+      this.addSummary(id, result);
+    }).on('error', (err) => {
+      this.setSummaryStatus(id, ReportStatusCode.GENERATION_FAILED);
     });
   }
 
-  private addSummary(id: string): (summary: Summary) => string {
-    return (summary: Summary): string => {
-      this.table[id] = summary;
-      return id;
-    };
+  private addSummary(id: string, summary: Summary): string {
+    this.table[id] = summary;
+    this.table[id].status = ReportStatusCode.AVAILABLE;
+    return id;
   }
 
   private newId(): string {
@@ -84,6 +93,14 @@ class SummaryModel {
       return this.table[id];
     } else {
       throw new Error(`${id} not found.`);
+    }
+  }
+
+  public async reportStatus(id:string):Promise<ReportStatusCode> {
+    if(id in this.table) {
+      return this.table[id].status || ReportStatusCode.GENERATION_FAILED;
+    } else {
+      return ReportStatusCode.NOT_FOUND;
     }
   }
 }

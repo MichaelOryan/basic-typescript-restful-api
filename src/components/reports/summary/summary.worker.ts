@@ -4,6 +4,7 @@ import Summary from './summary.interface';
 import Csv from '../../../util/csv';
 import { parentPort, workerData } from 'worker_threads';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('ts-node').register();
 require(path.resolve(__dirname, workerData.path));
 

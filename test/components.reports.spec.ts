@@ -8,7 +8,7 @@ import SupertestExtended from './../src/util/supertest';
 const app = new Server().expressApp();
 
 describe('GET non existant link for 404. Server exists and responds', function () {
-  it('responds with json', function (done) {
+  it('responds with 404', function (done) {
     request(app)
       .get('/some/non/existant/path')
       .expect('Content-Type', /html/)
@@ -72,6 +72,64 @@ describe('GET /sessions/reports/:id', function () {
   });
 });
 
+
+describe('GET /sessions/reports/:id/status', function () {
+  it('responds with ok for finalised report', function () {
+    let id = '';
+    return Promise.resolve().then(getIdFromPostRequest).then(PromiseExtended.delay(1000)).then(getSummaryFromId);
+    function getIdFromPostRequest() {
+      return request(app)
+        .post('/sessions/reports')
+        .send({ file: 'hello' })
+        .expect(SupertestExtended.statusOf([201, 202]))
+        .expect(function (res) {
+          id = res.body.id;
+        });
+    }
+    function getSummaryFromId() {
+      return request(app)
+        .get(`/sessions/reports/${id}/status`)
+        // TODO: clean this up :\
+        .expect(() => {
+          const checks = [() => typeof id === 'string', () => id.length > 0];
+          // Values used for banned types are above in checks
+          // eslint-disable-next-line @typescript-eslint/ban-types
+          const isTrue = (f: Function) => f() === true;
+          if (!checks.every(isTrue))
+            throw new Error(`Invalid id of ${JSON.stringify(id)}`);
+        })
+        .expect(200);
+    }
+  });
+  it('reponse for a valid id but not yet built report', function () {
+    let id = '';
+    return Promise.resolve().then(getIdFromPostRequest).then(getSummaryFromId);
+    function getIdFromPostRequest() {
+      return request(app)
+        .post('/sessions/reports')
+        .send({ file: 'hello' })
+        .expect(SupertestExtended.statusOf([201, 202]))
+        .expect(function (res) {
+          id = res.body.id;
+        });
+    }
+    function getSummaryFromId() {
+      return request(app)
+        .get(`/sessions/reports/${id}/status`)
+        .expect(() => {
+          const checks = [() => typeof id === 'string', () => id.length > 0];
+          // Values used for banned types are above in checks
+          // eslint-disable-next-line @typescript-eslint/ban-types
+          const isTrue = (f: Function) => f() === true;
+          if (!checks.every(isTrue))
+            throw new Error(`Invalid id of ${JSON.stringify(id)}`);
+        })
+        .expect(503);
+    }
+  });
+
+});
+
 describe('GET /sessions/reports/:id', function () {
   it('responds with 404 for invalid id', function () {
     return Promise.resolve().then(getSummaryFromId);
@@ -79,4 +137,17 @@ describe('GET /sessions/reports/:id', function () {
       return request(app).get('/sessions/reports/some_invalid_id').expect(404);
     }
   });
+
+
+});
+
+describe('GET /sessions/reports/:id/status', function () {
+  it('GET /sessions/reports/:id/status for non existant report', function () {
+    return Promise.resolve().then(getSummaryFromId);
+    function getSummaryFromId() {
+      return request(app).get('/sessions/reports/some_invalid_id/status').expect(404);
+    }
+  });
+
+  
 });
