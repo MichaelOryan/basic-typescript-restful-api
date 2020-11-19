@@ -1,4 +1,4 @@
-import HtmlStatusCode from './../util/htmlcodes';
+import HtmlStatusCode from '../util/html-codes.enum';
 
 interface Result {
   status: HtmlStatusCode;

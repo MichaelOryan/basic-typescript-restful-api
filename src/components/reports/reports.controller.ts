@@ -1,9 +1,9 @@
 import { Request, Response, Router } from 'express';
 import Controller from '../../interfaces/controller.interface';
 import SummeryModel from './summary/summary.model';
-import Result from './../../interfaces/post.result.interface';
-import HtmlStatusCode from './../../util/htmlcodes';
-import ReportStatusCode from './summary/summary-report-status-codes';
+import Result from '../../interfaces/post-result.interface';
+import HtmlStatusCode from '../../util/html-codes.enum';
+import ReportStatusCode from './summary/status-codes.enum';
 
 class ReportController implements Controller {
   public path = '/sessions/reports';
