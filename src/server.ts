@@ -21,8 +21,8 @@ class Server {
     return this;
   }
 
-  public static envPort():number {
-    return Number(process.env.PORT || 3000);
+  public static envPort(defaultPort = 3000):number {
+    return Number(process.env.PORT || defaultPort);
   }
 
 }
