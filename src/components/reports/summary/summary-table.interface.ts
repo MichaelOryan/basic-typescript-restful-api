@@ -1,5 +1,5 @@
 import Summary from './summary.interface';
-import ReportStatusCode from './summary-report-status-codes';
+import ReportStatusCode from './status-codes.enum';
 
 interface SummaryTable {
   [id: string]: { summery: Summary, status: ReportStatusCode };

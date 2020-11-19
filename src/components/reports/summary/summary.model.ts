@@ -1,11 +1,11 @@
 import Summary from './summary.interface';
-import SummaryTable from './summaryTable.interface';
+import SummaryTable from './summary-table.interface';
 import { v4 as uuidv4 } from 'uuid';
 import Csv from './../../../util/csv';
-import Result from './../../../interfaces/post.result.interface';
-import HttpStatusCode from './../../../util/htmlcodes';
+import Result from '../../../interfaces/post-result.interface';
+import HttpStatusCode from '../../../util/html-codes.enum';
 import { Worker } from 'worker_threads';
-import ReportStatusCode from './summary-report-status-codes';
+import ReportStatusCode from './status-codes.enum';
 
 class SummaryModel {
   private table: SummaryTable = {};
