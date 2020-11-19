@@ -3,6 +3,7 @@ import Controller from '../../interfaces/controller.interface';
 import SummeryModel from './summary/summary.model';
 import Result from './../../interfaces/post.result.interface';
 import HtmlStatusCode from './../../util/htmlcodes';
+import ReportStatusCode from './summary/summary-report-status-codes';
 
 class ReportController implements Controller {
   public path = '/sessions/reports';
@@ -15,9 +16,57 @@ class ReportController implements Controller {
   }
 
   private initializeRoutes() {
-    this.router.post(this.path, this.uploadCSVFile);
-    this.router.get(`${this.path}/:id`, this.getCSVSummaryById);
+    
+    // Paths
+    const basePath = () => this.path;
+    const reportByIdPath = () => basePath() + '/:id';
+    const reportStatusPath = () => reportByIdPath() + '/status';
+    const averageDailyPageViewsPath = () => reportByIdPath() + '/average-daily-pageviews';
+    const userToSessionRatioPath = () => reportByIdPath() + '/user-to-session-ratio';
+    const weeklyMaximumSessionsPath = () => reportByIdPath() + '/weekly-maximum-sessions';
+
+    this.router.post(basePath(), this.uploadCSVFile);
+    this.router.get(reportByIdPath(), this.getCSVSummaryById);
+    this.router.get(reportStatusPath(), this.reportStatus);
+    this.router.get(averageDailyPageViewsPath(), this.averageDailyPageViews);
+    this.router.get(userToSessionRatioPath(), this.userToSessionRatio);
+    this.router.get(weeklyMaximumSessionsPath(), this.weeklyMaximumSessions);
   }
+
+  public static reportStatusToHtmlStatusReply(reportStatus: ReportStatusCode):HtmlStatusCode {
+    const map = {
+      [ReportStatusCode.NOT_FOUND]: HtmlStatusCode.NOT_FOUND,
+      [ReportStatusCode.GENERATION_FAILED]: HtmlStatusCode.INTERNAL_SERVER_ERROR,
+      [ReportStatusCode.AVAILABLE]: HtmlStatusCode.OK,
+      [ReportStatusCode.BUILDING]: HtmlStatusCode.SERVICE_UNAVAILABLE,
+    };
+
+    return map[reportStatus];
+  }
+
+  private reportStatus = async (request: Request, response: Response) => {
+    const id = request.params.id;
+    this.summeryModel.reportStatus(id)
+      .then((reportStatus:ReportStatusCode) => {
+        const status = ReportController.reportStatusToHtmlStatusReply(reportStatus);
+        response.status(status).send();
+      }).catch((err) => {
+        response.status(500).json(err);
+      });
+
+  };
+
+  private averageDailyPageViews = async (request: Request, response: Response) => {
+    response.status(HtmlStatusCode.NOT_IMPLEMENTED).send();
+  };
+
+  private userToSessionRatio = async (request: Request, response: Response) => {
+    response.status(HtmlStatusCode.NOT_IMPLEMENTED).send();
+  };
+
+  private weeklyMaximumSessions = async (request: Request, response: Response) => {
+    response.status(HtmlStatusCode.NOT_IMPLEMENTED).send();
+  };
 
   private uploadCSVFile = async (request: Request, response: Response) => {
     this.summeryModel
@@ -34,13 +83,10 @@ class ReportController implements Controller {
       });
   };
 
+  // Marked for deletion
+  // Use direct paths for specific queries
   private getCSVSummaryById = async (request: Request, response: Response) => {
     const id = request.params.id;
-    // TODO: will need other status for files being processed
-    // 503, 404
-    // need another one if the resource failed and will never be available
-    // 500? 410? 403? 404?
-    // Similar logic to the post? Return a typed object depending on the status of the sunmary
     this.summeryModel
       .summary(id)
       .then((summary) => response.status(200).json(summary))
