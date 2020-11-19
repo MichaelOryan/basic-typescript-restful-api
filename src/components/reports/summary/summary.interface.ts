@@ -3,7 +3,7 @@
 import ReportStatusCode from './status-codes.enum';
 
 interface Summary {
-  averagePageViewsPerDay: number;
+  averagePageViewsPerDay: {[type:string]: number} ;
   userSessionRatio: number;
   weeklyMaximumSessions: number;
   status?: ReportStatusCode;
